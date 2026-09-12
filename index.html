@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Intake & Billing Notepad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-card: #182234;
+      --border: #334155;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-success: #059669;
+      --accent-success-hover: #047857;
+      --accent-danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #fff;
+    }
+
+    .brand-badge {
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .system-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .system-selector label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .system-selector select {
+      background: transparent;
+      border: none;
+      color: #38bdf8;
+      font-weight: 600;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .system-selector select option {
+      background: var(--bg-surface);
+      color: #fff;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 520px 1fr;
+      flex: 1;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1650px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .section-header-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .section-title {
+      font-size: 0.76rem;
+      color: #38bdf8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-add-item {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.55rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-add-item:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: #38bdf8;
+    }
+
+    .entry-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      position: relative;
+    }
+
+    .entry-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+
+    .btn-remove {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-remove:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 0.4rem;
+      background: var(--bg-card);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .mode-pill {
+      flex: 1;
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 0.35rem 0.5rem;
+      text-align: center;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .mode-pill.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input, select, textarea {
+      background: #0d1525;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.6rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.25);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+      font-family: inherit;
+    }
+
+    .currency-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .currency-symbol {
+      position: absolute;
+      left: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .currency-input-wrap input {
+      padding-left: 1.7rem;
+      width: 100%;
+    }
+
+    .card-last4-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .card-last4-prefix {
+      position: absolute;
+      left: 0.8rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      font-family: var(--font-mono);
+      pointer-events: none;
+    }
+
+    .card-last4-wrap input {
+      padding-left: 4.8rem;
+      letter-spacing: 0.1em;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .security-notice {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px dashed rgba(16, 185, 129, 0.35);
+      padding: 0.65rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      color: #6ee7b7;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      line-height: 1.45;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.3rem;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.65rem 1.1rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-success {
+      background: var(--accent-success);
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      background: var(--accent-success-hover);
+    }
+
+    .notepad-output-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      flex: 1;
+    }
+
+    .notepad-view {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #38bdf8;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      flex: 1;
+      min-height: 250px;
+      overflow-y: auto;
+      user-select: all;
+    }
+
+    .records-table-wrap {
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+
+    .records-table-wrap h4 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .card-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      display: inline-block;
+      margin: 1px 0;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #059669;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: none;
+      animation: fadeIn 0.2s ease;
+      z-index: 999;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 960px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      <span>📝 Customer Intake & Billing Notepad</span>
+      <span class="brand-badge">Multi-Station Demo</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.8rem;">
+      <a href="admin.html" style="text-decoration:none; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: var(--radius-sm); border: 1px solid rgba(59,130,246,0.4); color: #93c5fd; background: rgba(59,130,246,0.15);">⚙️ Admin Panel</a>
+      <div class="system-selector">
+        <label for="systemId">Workstation Assigned:</label>
+        <select id="systemId" onchange="updateNotepad()">
+          <option value="System-01">System-01</option>
+          <option value="System-02">System-02</option>
+          <option value="System-03">System-03</option>
+          <option value="System-04">System-04</option>
+          <option value="System-05">System-05</option>
+          <option value="System-06">System-06</option>
+          <option value="System-07">System-07</option>
+          <option value="System-08">System-08</option>
+          <option value="System-09">System-09</option>
+          <option value="System-10">System-10</option>
+          <option value="System-11">System-11</option>
+          <option value="System-12">System-12</option>
+          <option value="System-13">System-13</option>
+          <option value="System-14">System-14</option>
+          <option value="System-15">System-15</option>
+          <option value="System-16">System-16</option>
+          <option value="System-17">System-17</option>
+          <option value="System-18">System-18</option>
+          <option value="System-19">System-19</option>
+          <option value="System-20">System-20</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- INPUT PANEL -->
+    <section class="panel">
+      <div class="panel-header">
+        <span>Customer & Billing Input</span>
+        <button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="resetForm()">Clear Form</button>
+      </div>
+
+      <div class="panel-body">
+        <!-- MODE SELECTOR PILLS -->
+        <div class="form-group">
+          <label>Payment Intake Mode</label>
+          <div class="mode-pills">
+            <button type="button" class="mode-pill active" id="modeBoth" onclick="setMode('both')">Both Bank & Card</button>
+            <button type="button" class="mode-pill" id="modeBank" onclick="setMode('bank')">Bank Only</button>
+            <button type="button" class="mode-pill" id="modeCard" onclick="setMode('card')">Card Only</button>
+          </div>
+        </div>
+
+        <!-- CUSTOMER DETAILS -->
+        <div class="form-group">
+          <label>Customer Full Name *</label>
+          <input type="text" id="custName" placeholder="e.g. John Doe" oninput="updateNotepad()">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="custEmail" placeholder="customer@example.com" oninput="updateNotepad()">
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="custPhone" placeholder="+1 (555) 000-0000" oninput="updateNotepad()">
+          </div>
+        </div>
+
+        <!-- BANKING & AMOUNT SECTION -->
+        <div id="bankSectionGroup">
+          <div class="section-header-wrap">
+            <span class="section-title">🏦 Banking & Amount</span>
+            <button type="button" class="btn-add-item" onclick="addBankRow()">+ Add Another Bank</button>
+          </div>
+
+          <div id="bankList" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+            <!-- Bank rows will be dynamically populated -->
+          </div>
+        </div>
+
+        <!-- CARD REFERENCE SECTION -->
+        <div id="cardSectionGroup">
+          <div class="section-header-wrap">
+            <span class="section-title">💳 Card Reference Details</span>
+            <button type="button" class="btn-add-item" onclick="addCardRow()">+ Add Another Card</button>
+          </div>
+
+          <!-- TEST MODE TOGGLE -->
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-top:0.6rem;">
+            <label style="text-transform:none; font-size:0.78rem; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+              <input type="checkbox" id="stripeTestToggle" onchange="toggleStripeTestMode()" style="width:14px;height:14px; cursor:pointer; accent-color:#7c3aed;">
+              <span>Use Stripe <strong style="color:#7c3aed;">Test Mode</strong></span>
+            </label>
+            <span id="testModeBadge" style="display:none; background:rgba(124,58,237,0.18); border:1px solid rgba(124,58,237,0.45); color:#a78bfa; font-size:0.7rem; font-weight:700; padding:0.15rem 0.55rem; border-radius:9999px; letter-spacing:0.05em;">🧪 TEST ONLY — NOT REAL DATA</span>
+          </div>
+
+          <!-- STRIPE TEST CARD INFO BOX -->
+          <div id="stripeTestBox" style="display:none; background:rgba(124,58,237,0.09); border:1px dashed rgba(124,58,237,0.45); border-radius:6px; padding:0.75rem; margin-top:0.5rem; font-size:0.78rem; color:#c4b5fd; line-height:1.7;">
+            <div style="font-weight:700; color:#a78bfa; margin-bottom:0.3rem;">🧪 Stripe Test Card Details (Auto-filled below)</div>
+            <div>Card Number &nbsp;: <span style="font-family:monospace; color:#e9d5ff;">4242 4242 4242 4242</span></div>
+            <div>Expiry &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span style="font-family:monospace; color:#e9d5ff;">12/28 (any future date)</span></div>
+            <div>CVV &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span style="font-family:monospace; color:#e9d5ff;">123 (any 3 digits)</span></div>
+            <div style="margin-top:0.4rem; font-size:0.72rem; color:#7c3aed; font-weight:600;">⚠️ These credentials are for Stripe sandbox testing only. Never use on live systems.</div>
+          </div>
+
+          <div id="cardList" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+            <!-- Card rows will be dynamically populated -->
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="section-header-wrap">
+          <span class="section-title">📝 Agent Notes</span>
+        </div>
+
+        <div class="form-group">
+          <textarea id="notes" placeholder="Enter transaction summary, customer requests, or call notes..." oninput="updateNotepad()"></textarea>
+        </div>
+
+        <div class="security-notice">
+          <span>🛡️</span>
+          <span><strong>PCI-DSS Compliance:</strong> Non-sensitive reference details (Card Network, Cardholder Name, Last 4 digits) can be recorded. Raw CVVs and full card numbers must not be stored.</span>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn-primary" onclick="saveRecord()">💾 Save Record</button>
+          <button class="btn-secondary" onclick="downloadTxtFile()" style="font-weight:600; color:#38bdf8; border-color:rgba(56,189,248,0.4); background:rgba(56,189,248,0.12);">📄 Save as .TXT</button>
+          <button class="btn-success" onclick="copyNotepad()">📋 Copy Notepad Text</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTEPAD PREVIEW & HISTORY PANEL -->
+    <section class="panel">
+      <div class="panel-header">
+        <span>Real-Time Formatted Notepad</span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="exportCSV()">Export CSV</button>
+          <button class="btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="clearAllHistory()">Clear History</button>
+        </div>
+      </div>
+
+      <div class="panel-body notepad-output-wrapper">
+        <div class="notepad-view" id="notepadDisplay"></div>
+
+        <div class="records-table-wrap">
+          <h4>
+            <span>Workstation Intake Logs</span>
+            <span id="recordCount" style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">0 records</span>
+          </h4>
+          <div style="max-height: 220px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>System</th>
+                  <th>Customer</th>
+                  <th>Bank(s) & Amount</th>
+                  <th>Card(s) Ref</th>
+                </tr>
+              </thead>
+              <tbody id="recordsBody">
+                <tr>
+                  <td colspan="5" style="text-align:center; color: var(--text-dim); padding: 1.5rem;">No saved records yet. Fill out the form and click "Save Record".</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Notepad text copied to clipboard!</div>
+
+  <script>
+    const STORAGE_KEY = 'tec_company_customer_records';
+    let currentMode = 'both';
+    let bankCount = 0;
+    let cardCount = 0;
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('modeBoth').classList.toggle('active', mode === 'both');
+      document.getElementById('modeBank').classList.toggle('active', mode === 'bank');
+      document.getElementById('modeCard').classList.toggle('active', mode === 'card');
+
+      document.getElementById('bankSectionGroup').style.display = (mode === 'both' || mode === 'bank') ? 'block' : 'none';
+      document.getElementById('cardSectionGroup').style.display = (mode === 'both' || mode === 'card') ? 'block' : 'none';
+
+      updateNotepad();
+    }
+
+    function addBankRow(bankName = '', amount = '') {
+      bankCount++;
+      const id = bankCount;
+      const bankList = document.getElementById('bankList');
+      const card = document.createElement('div');
+      card.className = 'entry-card';
+      card.id = `bank-card-${id}`;
+
+      card.innerHTML = `
+        <div class="entry-card-header">
+          <span>Bank Account #${bankList.children.length + 1}</span>
+          ${bankList.children.length > 0 ? `<button type="button" class="btn-remove" onclick="removeBankRow(${id})">✕ Remove</button>` : ''}
+        </div>
+        <div class="form-group">
+          <label>Bank Name *</label>
+          <input type="text" class="bank-name-input" placeholder="e.g. Chase / Wells Fargo / Bank of America" value="${escapeHtml(bankName)}" oninput="updateNotepad()">
+        </div>
+        <div class="form-group">
+          <label>Amount ($) * (Under Bank Name)</label>
+          <div class="currency-input-wrap">
+            <span class="currency-symbol">$</span>
+            <input type="number" step="0.01" class="bank-amount-input" placeholder="0.00" value="${escapeHtml(amount)}" oninput="updateNotepad()">
+          </div>
+        </div>
+      `;
+
+      bankList.appendChild(card);
+      renumberBankHeaders();
+      updateNotepad();
+    }
+
+    function removeBankRow(id) {
+      const el = document.getElementById(`bank-card-${id}`);
+      if (el) {
+        el.remove();
+        renumberBankHeaders();
+        updateNotepad();
+      }
+    }
+
+    function renumberBankHeaders() {
+      const headers = document.querySelectorAll('#bankList .entry-card-header span');
+      headers.forEach((h, idx) => {
+        h.innerText = `Bank Account #${idx + 1}`;
+      });
+    }
+
+    function addCardRow(cardholder = '', last4 = '', expiry = '', cvv = '') {
+      cardCount++;
+      const id = cardCount;
+      const cardList = document.getElementById('cardList');
+      const card = document.createElement('div');
+      card.className = 'entry-card';
+      card.id = `card-card-${id}`;
+      const isTest = document.getElementById('stripeTestToggle').checked;
+
+      card.innerHTML = `
+        <div class="entry-card-header">
+          <span>Card Details #${cardList.children.length + 1}</span>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            ${isTest ? '<span style="background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.4);color:#a78bfa;font-size:0.68rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:4px;">🧪 TEST</span>' : ''}
+            ${cardList.children.length > 0 ? `<button type="button" class="btn-remove" onclick="removeCardRow(${id})">✕ Remove</button>` : ''}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cardholder Name</label>
+          <input type="text" class="card-holder-input" placeholder="Name on card" value="${escapeHtml(cardholder)}" oninput="updateNotepad()">
+        </div>
+        <div class="form-group">
+          <label>Card Number</label>
+          <input type="text" maxlength="19" class="card-last4-input" placeholder="8000 4321 2345 3452" value="${escapeHtml(last4)}" oninput="formatCardNumber(this); updateNotepad();" style="font-family:var(--font-mono); font-size:0.95rem; letter-spacing:0.08em; ${isTest ? 'border-color:rgba(124,58,237,0.5);' : ''}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="text" maxlength="5" class="card-expiry-input" placeholder="MM/YY" value="${escapeHtml(expiry)}" oninput="formatExpiry(this); updateNotepad();" style="${isTest ? 'border-color:rgba(124,58,237,0.5);' : ''}">
+          </div>
+          <div class="form-group">
+            <label>CVV ${isTest ? '<span style="color:#7c3aed;font-size:0.65rem;">(Test)</span>' : ''}</label>
+            <input type="text" maxlength="4" class="card-cvv-input" placeholder="123" value="${escapeHtml(cvv)}" oninput="updateNotepad();" style="font-family:var(--font-mono); letter-spacing:0.1em; ${isTest ? 'border-color:rgba(124,58,237,0.5);' : ''}">
+          </div>
+        </div>
+      `;
+
+      cardList.appendChild(card);
+      renumberCardHeaders();
+      updateNotepad();
+    }
+
+    function removeCardRow(id) {
+      const el = document.getElementById(`card-card-${id}`);
+      if (el) {
+        el.remove();
+        renumberCardHeaders();
+        updateNotepad();
+      }
+    }
+
+    function renumberCardHeaders() {
+      const headers = document.querySelectorAll('#cardList .entry-card-header span');
+      headers.forEach((h, idx) => {
+        h.innerText = `Card Reference #${idx + 1}`;
+      });
+    }
+
+    function formatLast4(input) {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+    }
+
+    function formatCardNumber(input) {
+      // Strip all non-digits
+      let v = input.value.replace(/[^0-9]/g, '').slice(0, 16);
+      // Insert space every 4 digits
+      let formatted = '';
+      for (let i = 0; i < v.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += ' ';
+        formatted += v[i];
+      }
+      input.value = formatted;
+    }
+
+    function formatExpiry(input) {
+      let v = input.value.replace(/[^0-9]/g, '');
+      if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2, 4);
+      input.value = v;
+    }
+
+    function toggleStripeTestMode() {
+      const isTest = document.getElementById('stripeTestToggle').checked;
+      document.getElementById('stripeTestBox').style.display = isTest ? 'block' : 'none';
+      document.getElementById('testModeBadge').style.display = isTest ? 'inline-flex' : 'none';
+
+      // Clear card list and rebuild with test data pre-filled or blank
+      document.getElementById('cardList').innerHTML = '';
+      cardCount = 0;
+      if (isTest) {
+        addCardRow('Test Cardholder', '4242 4242 4242 4242', '12/28', '123');
+      } else {
+        addCardRow();
+      }
+      updateNotepad();
+    }
+
+    function getNowString() {
+      const d = new Date();
+      return d.toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'medium'
+      });
+    }
+
+    function getBankData() {
+      const cards = document.querySelectorAll('#bankList .entry-card');
+      const list = [];
+      let total = 0;
+      cards.forEach(c => {
+        const name = c.querySelector('.bank-name-input').value.trim();
+        const amtVal = parseFloat(c.querySelector('.bank-amount-input').value) || 0.00;
+        total += amtVal;
+        list.push({ bank: name, amount: amtVal });
+      });
+      return { list, total };
+    }
+
+    function getCardData() {
+      const cards = document.querySelectorAll('#cardList .entry-card');
+      const list = [];
+      cards.forEach(c => {
+        const holder = c.querySelector('.card-holder-input').value.trim();
+        const last4 = c.querySelector('.card-last4-input').value.trim();
+        const expiry = c.querySelector('.card-expiry-input') ? c.querySelector('.card-expiry-input').value.trim() : '';
+        const cvv = c.querySelector('.card-cvv-input') ? c.querySelector('.card-cvv-input').value.trim() : '';
+        list.push({ type: 'Card', holder, last4, expiry, cvv });
+      });
+      return list;
+    }
+
+    function updateNotepad() {
+      const system = document.getElementById('systemId').value;
+      const name = document.getElementById('custName').value.trim() || '---';
+      const email = document.getElementById('custEmail').value.trim() || '---';
+      const phone = document.getElementById('custPhone').value.trim() || '---';
+      const notes = document.getElementById('notes').value.trim() || '(None)';
+      const now = getNowString();
+
+      let bankSectionText = '';
+      if (currentMode === 'both' || currentMode === 'bank') {
+        const { list, total } = getBankData();
+        bankSectionText = `\n[ BANKING & AMOUNT ]\n----------------------------------------\n`;
+        if (list.length === 0) {
+          bankSectionText += `(No Bank Specified)\n`;
+        } else {
+          list.forEach((b, idx) => {
+            const bName = b.bank || '---';
+            const bAmt = `$${b.amount.toFixed(2)}`;
+            bankSectionText += `Bank #${idx + 1}      : ${bName}\nAmount #${idx + 1}    : ${bAmt}\n`;
+            if (idx < list.length - 1) bankSectionText += `--------------------\n`;
+          });
+          if (list.length > 1) {
+            bankSectionText += `--------------------\nTotal Billing: $${total.toFixed(2)}\n`;
+          }
+        }
+      }
+
+      let cardSectionText = '';
+      if (currentMode === 'both' || currentMode === 'card') {
+        const cardList = getCardData();
+        const isTestMode = document.getElementById('stripeTestToggle').checked;
+        cardSectionText = `\n[ CARD DETAILS${isTestMode ? ' — 🧪 STRIPE TEST MODE' : ''} ]\n----------------------------------------\n`;
+        if (cardList.length === 0) {
+          cardSectionText += `(No Card Specified)\n`;
+        } else {
+          cardList.forEach((c, idx) => {
+            const cHolder = c.holder || '---';
+            // Show full card number as entered
+            const cRef = c.last4 ? c.last4 : '---- ---- ---- ----';
+            const cExpiry = c.expiry || '---';
+            const cCvv = c.cvv || '---';
+            cardSectionText += `Cardholder #${idx + 1}  : ${cHolder}\nCard Number #${idx + 1} : ${cRef}\nExpiry #${idx + 1}     : ${cExpiry}\nCVV #${idx + 1}        : ${cCvv}\n`;
+            if (idx < cardList.length - 1) cardSectionText += `--------------------\n`;
+          });
+        }
+      }
+
+      const text = `========================================
+         CUSTOMER INTAKE RECORD         
+========================================
+Workstation : ${system}
+Timestamp   : ${now}
+
+[ CUSTOMER DETAILS ]
+----------------------------------------
+Customer Name : ${name}
+Email ID      : ${email}
+Phone No      : ${phone}${bankSectionText}${cardSectionText}
+[ AGENT NOTES ]
+----------------------------------------
+${notes}
+========================================`;
+
+      document.getElementById('notepadDisplay').innerText = text;
+    }
+
+    function copyNotepad() {
+      const text = document.getElementById('notepadDisplay').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Notepad content copied to clipboard!');
+      }).catch(err => {
+        showToast('Text copied!');
+      });
+    }
+
+    function downloadTxtFile() {
+      const text = document.getElementById('notepadDisplay').innerText;
+      const custName = (document.getElementById('custName').value.trim() || 'Customer').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const system = document.getElementById('systemId').value;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${system}_${custName}_${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('📄 Formatted .txt file downloaded!');
+    }
+
+    async function saveRecord() {
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+
+      if (!name) {
+        alert('Please enter Customer Full Name.');
+        document.getElementById('custName').focus();
+        return;
+      }
+
+      const { list: bankList, total: totalAmt } = getBankData();
+      const cardList = getCardData();
+
+      const record = {
+        id: 'REC-' + Date.now(),
+        system: document.getElementById('systemId').value,
+        timestamp: getNowString(),
+        customer: name,
+        email: document.getElementById('custEmail').value.trim() || 'N/A',
+        phone: phone || 'N/A',
+        banks: bankList,
+        totalAmount: `$${totalAmt.toFixed(2)}`,
+        cards: cardList,
+        isTestMode: document.getElementById('stripeTestToggle').checked,
+        notes: document.getElementById('notes').value.trim()
+      };
+
+      // Always save to local browser storage
+      const localRecords = loadLocalRecords();
+      localRecords.unshift(record);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localRecords));
+
+      // If connected to central LAN server, sync to central SQLite database
+      if (window.location.protocol.startsWith('http')) {
+        try {
+          await fetch('/api/records', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+          });
+        } catch (e) {
+          console.warn('LAN server sync notice, record saved locally:', e);
+        }
+      }
+
+      await renderRecordsTable();
+      showToast('✅ Customer record saved successfully!');
+    }
+
+    function loadLocalRecords() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async function loadRecords() {
+      if (window.location.protocol.startsWith('http')) {
+        try {
+          const res = await fetch('/api/records');
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (e) {
+          console.warn('Using local storage fallback:', e);
+        }
+      }
+      return loadLocalRecords();
+    }
+
+    async function renderRecordsTable() {
+      const records = await loadRecords();
+      const tbody = document.getElementById('recordsBody');
+      document.getElementById('recordCount').innerText = `${records.length} record(s)`;
+
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-dim); padding: 1.5rem;">No saved records yet. Fill out the form and click "Save Record".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = records.map(r => {
+        const banksSummary = (r.banks || []).map(b => `${escapeHtml(b.bank || 'Bank')}: $${(b.amount || 0).toFixed(2)}`).join('<br>') || 'N/A';
+        const testBadge = r.isTestMode ? `<span style="background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.4);color:#a78bfa;font-size:0.65rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;margin-left:3px;">🧪 TEST</span>` : '';
+        const cardsSummary = (r.cards || []).map(c => {
+          const rawDigits = (c.last4 || '').replace(/\s/g, '');
+          const last4display = rawDigits.length >= 4 ? rawDigits.slice(-4) : rawDigits || '----';
+          return `<span class="card-badge">${escapeHtml(c.type)} •••• ${last4display}${c.expiry ? ' | ' + escapeHtml(c.expiry) : ''}</span>`;
+        }).join('<br>') || 'N/A';
+
+        return `
+          <tr>
+            <td style="color: var(--text-muted); font-size: 0.75rem;">${r.timestamp}</td>
+            <td><strong>${r.system}</strong></td>
+            <td>${escapeHtml(r.customer)}<br><small style="color: var(--text-muted);">${escapeHtml(r.phone)}</small></td>
+            <td>${banksSummary}<br><strong style="color: #38bdf8;">Total: ${r.totalAmount || '$0.00'}</strong></td>
+            <td>${cardsSummary}${testBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetForm() {
+      document.getElementById('custName').value = '';
+      document.getElementById('custEmail').value = '';
+      document.getElementById('custPhone').value = '';
+      document.getElementById('notes').value = '';
+      
+      document.getElementById('bankList').innerHTML = '';
+      document.getElementById('cardList').innerHTML = '';
+      bankCount = 0;
+      cardCount = 0;
+
+      addBankRow();
+      addCardRow();
+      updateNotepad();
+      showToast('Form cleared');
+    }
+
+    function exportCSV() {
+      const records = loadRecords();
+      if (records.length === 0) {
+        alert('No records available to export.');
+        return;
+      }
+
+      const headers = ['Record ID', 'System', 'Timestamp', 'Customer Name', 'Email', 'Phone', 'Banks & Amounts', 'Total Amount', 'Cards Reference', 'Notes'];
+      const rows = records.map(r => {
+        const banksText = (r.banks || []).map(b => `${b.bank}: $${(b.amount || 0).toFixed(2)}`).join(' | ');
+        const cardsText = (r.cards || []).map(c => `${c.type} (${c.holder || 'N/A'}) - last4: ${c.last4 || 'N/A'}`).join(' | ');
+        return [
+          `"${r.id}"`,
+          `"${r.system}"`,
+          `"${r.timestamp}"`,
+          `"${r.customer.replace(/"/g, '""')}"`,
+          `"${r.email.replace(/"/g, '""')}"`,
+          `"${r.phone.replace(/"/g, '""')}"`,
+          `"${banksText.replace(/"/g, '""')}"`,
+          `"${r.totalAmount || '$0.00'}"`,
+          `"${cardsText.replace(/"/g, '""')}"`,
+          `"${(r.notes || '').replace(/"/g, '""')}"`
+        ];
+      });
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `customer_records_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('📁 Records exported to CSV!');
+    }
+
+    function clearAllHistory() {
+      if (confirm('Are you sure you want to clear all locally saved records on this system?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderRecordsTable();
+        showToast('History cleared.');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m];
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+
+    // Initial setup: 1 bank row and 1 card row
+    addBankRow();
+    addCardRow();
+    renderRecordsTable();
+  </script>
+</body>
+</html>
