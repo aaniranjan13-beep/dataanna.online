@@ -329,27 +329,48 @@ function initAuth(){
   }
 }
 
+function sanitizeRecords(data){
+  return (Array.isArray(data) ? data : []).map(record => ({
+    ...record,
+    cards: (record.cards || []).map(card => {
+      const raw = String(card?.last4 || '').replace(/\D/g, '');
+      return {
+        type: 'Card',
+        holder: card?.holder || '',
+        reference: card?.reference || '',
+        last4: raw.length >= 4 ? raw.slice(-4) : raw,
+        expiry: card?.expiry || ''
+      };
+    })
+  }));
+}
 async function load(){
   if (window.location.protocol.startsWith('http')) {
     try {
       const res = await fetch('/api/records');
       if (res.ok) {
-        records = await res.json();
+        records = sanitizeRecords(await res.json());
         return;
       }
     } catch(e) {
       console.warn('LAN server fetch notice, fallback to local storage:', e);
     }
   }
-  try{const x=localStorage.getItem(STORAGE_KEY);records=x?JSON.parse(x):[]}catch(e){records=[]}
+  try{
+    const x=localStorage.getItem(STORAGE_KEY);
+    records=sanitizeRecords(x?JSON.parse(x):[]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  }catch(e){records=[]}
 }
 function money(n){return '$'+(Number(n)||0).toFixed(2)}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function cardMask(c){
-  const digits=String(c?.last4||'').replace(/\D/g,'');
-  const last4=digits.length>=4?digits.slice(-4):digits||'----';
-  const holder=c?.holder?` (${escapeHtml(c.holder)})`:'';
-  return `Card •••• ${last4}${holder}`;
+  const reference = escapeHtml(c?.reference || '');
+  const digits = String(c?.last4 || '').replace(/\D/g, '');
+  const last4 = digits.length >= 4 ? digits.slice(-4) : '----';
+  const holder = c?.holder ? ` (${escapeHtml(c.holder)})` : '';
+  const expiry = c?.expiry ? ` · Exp: ${escapeHtml(c.expiry)}` : '';
+  return `Card Ref: ${reference || 'N/A'} · Last 4: ${last4}${holder}${expiry}`;
 }
 function totalOf(r){return (r.banks||[]).reduce((a,b)=>a+(Number(b.amount)||0),0)}
 function uniqueSystems(){return [...new Set(records.map(r=>r.system).filter(Boolean))].sort()}
@@ -420,11 +441,12 @@ function openRecord(i){
   document.getElementById('modalTitle').textContent=`${r.customer||'Customer'} · ${r.id||''}`;
   const banks=(r.banks||[]).map(b=>`${escapeHtml(b.bank||'Bank')} — ${money(b.amount)}`).join('<br>')||'None';
   const cards=(r.cards||[]).map(c=>{
-    const digits=String(c?.last4||'').replace(/\D/g,'');
-    const last4=digits.length>=4?digits.slice(-4):digits||'----';
-    const holder=c?.holder?`Holder: ${escapeHtml(c.holder)} · `:'';
-    const exp=c?.expiry?` · Exp: ${escapeHtml(c.expiry)}`:'';
-    return `${holder}•••• •••• •••• ${last4}${exp}`;
+    const reference = c?.reference ? `Reference: ${escapeHtml(c.reference)}` : 'Reference: N/A';
+    const digits = String(c?.last4 || '').replace(/\D/g, '');
+    const last4 = digits.length >= 4 ? digits.slice(-4) : '----';
+    const holder = c?.holder ? ` · Holder: ${escapeHtml(c.holder)}` : '';
+    const exp = c?.expiry ? ` · Exp: ${escapeHtml(c.expiry)}` : '';
+    return `${reference} · Last 4: ${last4}${holder}${exp}`;
   }).join('<br>')||'None';
   document.getElementById('modalBody').innerHTML=`
     <div class="detail"><label>Record ID</label><strong class="mono">${escapeHtml(r.id)}</strong></div>
@@ -437,7 +459,7 @@ function openRecord(i){
     <div class="detail full"><label>Card references</label><strong>${cards}</strong></div>
     <div class="detail full"><label>Agent notes</label><div class="note-box">${escapeHtml(r.notes||'No notes')}</div></div>
     ${r.isTestMode?'<div class="detail full"><span class="badge purple">STRIPE TEST MODE RECORD</span></div>':''}
-    <div class="detail full"><label>Security</label><div class="note-box">This admin view intentionally does not expose CVV or full card numbers. The source intake page should be updated so raw PAN/CVV are never persisted to localStorage.</div></div>`;
+    <div class="detail full"><label>Security</label><div class="note-box">Card/payment references, last 4 digits, expiry and cardholder name may be displayed. CVV is never stored or displayed by this application.</div></div>`;
   document.getElementById('modal').classList.add('show');
 }
 function closeModal(){document.getElementById('modal').classList.remove('show')}
@@ -476,7 +498,7 @@ function exportCSV(){
     r.id,r.system,r.timestamp,r.customer,r.email,r.phone,
     (r.banks||[]).map(b=>`${b.bank||'Bank'}: ${money(b.amount)}`).join(' | '),
     money(totalOf(r)),
-    (r.cards||[]).map(c=>`${c.type||'Card'} •••• ${(String(c.last4||'').replace(/\D/g,'').slice(-4)||'----')}`).join(' | '),
+    (r.cards||[]).map(c=>`${c.type||'Card'} ref: ${c.reference||'N/A'} last4: ${(String(c.last4||'').replace(/\D/g,'').slice(-4)||'----')}`).join(' | '),
     r.notes||''
   ].map(q).join(','));
   const blob=new Blob([[headers.map(q).join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
